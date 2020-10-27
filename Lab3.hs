@@ -110,4 +110,5 @@ compuneList f lf = map (\ f' -> (f.f') ) lf
 aplicaList :: a -> [(a->b)] -> [b]
 aplicaList a lf = map (\ f -> f a) lf
 
+myZip3 :: [a] -> [b] -> [c] -> [(a, b, c)]
 myZip3 l1 l2 l3 = map (\ ((x,y),z) -> (x,y,z)) (zip (zip l1 l2) l3)
