@@ -144,6 +144,8 @@ satisfiabila  p =
 test_satisfiabila1 = satisfiabila (Not (Var "P") :&: Var "Q") == True
 test_satisfiabila2 = satisfiabila (Not (Var "P") :&: Var "P") == False
 
+-- EX7 ----------------------------------------------------
+
 valida :: Prop -> Bool
 valida p = not (satisfiabila (Not p))
 
