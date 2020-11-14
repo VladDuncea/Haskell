@@ -112,7 +112,8 @@ test_variabile = variabile (Not (Var "P") :&: Var "Q") == ["P", "Q"]
 -- EX5 ----------------------------------------------------
 
 envs :: [Nume] -> [Env]
-envs = undefined
+envs [] = [[]]
+envs (x:xs) = [(x,False ):e | e <- envs xs ] ++ [( x , True ):e | e <- envs xs ]
 
 test_envs =
       envs ["P", "Q"]
@@ -131,14 +132,20 @@ test_envs =
         ]
       ]
 
+-- EX6 ----------------------------------------------------
+
 satisfiabila :: Prop -> Bool
-satisfiabila = undefined
+satisfiabila  p = 
+  let vars = variabile p in
+  let l = envs vars in
+    elem True [eval p x | x <- l]
+
 
 test_satisfiabila1 = satisfiabila (Not (Var "P") :&: Var "Q") == True
 test_satisfiabila2 = satisfiabila (Not (Var "P") :&: Var "P") == False
 
 valida :: Prop -> Bool
-valida = undefined
+valida p = not (satisfiabila (Not p))
 
 test_valida1 = valida (Not (Var "P") :&: Var "Q") == False
 test_valida2 = valida (Not (Var "P") :|: Var "P") == True
