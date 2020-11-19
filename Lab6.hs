@@ -92,6 +92,8 @@ impureLookup :: Eq a => a -> [(a,b)] -> b
 impureLookup a = fromJust . lookup a
 
 eval :: Prop -> Env -> Bool
+eval F _ = False
+eval T _ = True
 eval (Var x) env = impureLookup x env 
 eval (Not x) env = not (eval x env)
 eval (p1 :|: p2) env = (eval p1 env) || (eval p2 env) 
