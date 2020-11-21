@@ -11,8 +11,10 @@ data  Value  =  VBool Bool
 data  Hask  = HTrue | HFalse 
         |HIf Hask Hask Hask
         |HLit Int
+        |HLet Name Hask Hask
         |Hask :==: Hask
         |Hask :+:  Hask
+        |Hask :*:  Hask
         |HVar Name
         |HLam Name Hask
         |Hask :$: Hask
@@ -20,6 +22,7 @@ data  Hask  = HTrue | HFalse
         
 infix 4 :==:
 infixl 6 :+:
+infixl 7 :*:
 infixl 9 :$:
 
 type  HEnv  =  [(Name, Value)]
@@ -46,15 +49,24 @@ hEval (HIf c d e) r   =
   where  hif (VBool b) v w  =  if b then v else w
          hif _ _ _ = VError   
   
-hEval (HLit i) r      =  VInt i
+hEval (HLit i) _      =  VInt i
+
+hEval (HLet n h1 h2) r = 
+  let val = hEval h1 r in
+  let r2 = ((n,val):r) in
+    hEval h2 r2
 
 hEval (d :==: e) r     =  heq (hEval d r) (hEval e r)
   where  heq (VInt i) (VInt j) = VBool (i == j)
-         heq  _ _ = VError    
+         heq  _ _ = error "Tipul de date nu poate fi comparat!"     
   
 hEval (d :+: e) r    =  hadd (hEval d r) (hEval e r)
   where  hadd (VInt i) (VInt j) = VInt (i + j)
-         hadd _ _  = VError   
+         hadd _ _  = error "Tipul de date nu poate fi adunat!"   
+
+hEval (d :*: e) r    =  hmul (hEval d r) (hEval e r)
+  where  hmul (VInt i) (VInt j) = VInt (i * j)
+         hmul _ _  = error "Tipul de date nu poate fi inmultit!" 
   
 hEval (HVar x) r      =  fromMaybe VError (lookup  x r)
 
@@ -68,10 +80,14 @@ hEval (d :$: e) r    =  happ (hEval d r) (hEval e r)
 run :: Hask -> String
 run pg = showV (hEval pg [])
 
-h0 =  (HLam "x" (HLam "y" ((HVar "x") :+: (HVar "y")))) 
+h0 =  (HLam "x" (HLam "y" ((HVar "x") :+: (HVar "y") :*: (HVar "y") ))) 
       :$: (HLit 3)
-      :$: (HLit 4)
-      
+      :$: (HLit 5)
 
+h1 =  (HLam "x" (HLam "y" ((HVar "x") :*: HTrue))) 
+      :$: (HLit 3)
+      :$: (HLit 5)
+      
+h2 = HLet "x" (HLit 3) ((HLit 4) :+: (HVar "x"))
 
 test_h0 = eqV (hEval h0 []) (VInt 7)
